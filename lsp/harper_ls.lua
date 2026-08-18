@@ -30,7 +30,6 @@ return {
     'gitcommit',
     'go',
     'html',
-    'heex',
     'java',
     'javascript',
     'lua',
