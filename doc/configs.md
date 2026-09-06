@@ -52,6 +52,7 @@ Nvim by running `:help lspconfig-all`.
 - [circom-lsp](#circom-lsp)
 - [clangd](#clangd)
 - [clarinet](#clarinet)
+- [clice](#clice)
 - [clojure_lsp](#clojure_lsp)
 - [cmake](#cmake)
 - [cobol_ls](#cobol_ls)
@@ -209,6 +210,7 @@ Nvim by running `:help lspconfig-all`.
 - [motoko_lsp](#motoko_lsp)
 - [move_analyzer](#move_analyzer)
 - [mpls](#mpls)
+- [ms_terraform_lsp](#ms_terraform_lsp)
 - [msbuild_project_tools_server](#msbuild_project_tools_server)
 - [muon](#muon)
 - [mutt_ls](#mutt_ls)
@@ -244,6 +246,7 @@ Nvim by running `:help lspconfig-all`.
 - [perlpls](#perlpls)
 - [pest_ls](#pest_ls)
 - [phan](#phan)
+- [php_lsp](#php_lsp)
 - [phpactor](#phpactor)
 - [phpantom_lsp](#phpantom_lsp)
 - [phptools](#phptools)
@@ -294,6 +297,7 @@ Nvim by running `:help lspconfig-all`.
 - [rumdl](#rumdl)
 - [rune_languageserver](#rune_languageserver)
 - [rust_analyzer](#rust_analyzer)
+- [rust_glancer](#rust_glancer)
 - [salt_ls](#salt_ls)
 - [scheme_langserver](#scheme_langserver)
 - [scry](#scry)
@@ -339,6 +343,7 @@ Nvim by running `:help lspconfig-all`.
 - [svlangserver](#svlangserver)
 - [svls](#svls)
 - [swift_mesonls](#swift_mesonls)
+- [symfony_lsp](#symfony_lsp)
 - [syntax_tree](#syntax_tree)
 - [systemd_ls](#systemd_ls)
 - [systemd_lsp](#systemd_lsp)
@@ -977,7 +982,7 @@ Default config:
   ```
 - `filetypes` :
   ```lua
-  { "bash", "c", "cpp", "cs", "css", "elixir", "go", "haskell", "html", "java", "javascript", "javascriptreact", "json", "kotlin", "lua", "nix", "php", "python", "ruby", "rust", "scala", "solidity", "swift", "typescript", "typescriptreact", "yaml" }
+  { "bash", "c", "cpp", "cs", "css", "elixir", "go", "haskell", "html", "java", "javascript", "javascriptreact", "json", "kotlin", "lua", "nix", "php", "python", "ruby", "rust", "scala", "sh", "solidity", "swift", "typescript", "typescriptreact", "yaml" }
   ```
 - `reuse_client`: [../lsp/ast_grep.lua:12](../lsp/ast_grep.lua#L12)
 - `root_markers` :
@@ -2352,6 +2357,43 @@ Default config:
 - `root_markers` :
   ```lua
   { "Clarinet.toml" }
+  ```
+
+---
+
+## clice
+
+https://github.com/clice-io/clice
+Clice is a next-generation language server for modern C++, focused on performance and code intelligence
+
+Snippet to enable the language server:
+```lua
+vim.lsp.enable('clice')
+```
+
+Default config:
+- `capabilities` :
+  ```lua
+  {
+    offsetEncoding = { "utf-8" },
+    textDocument = {
+      completion = {
+        editsNearCursor = true
+      }
+    }
+  }
+  ```
+- `cmd` :
+  ```lua
+  { "clice", "serve" }
+  ```
+- `filetypes` :
+  ```lua
+  { "c", "cpp" }
+  ```
+- `root_markers` :
+  ```lua
+  { "clice.toml", ".clang-tidy", ".clang-format", "compile_commands.json", "compile_flags.txt", "configure.ac", ".git" }
   ```
 
 ---
@@ -4333,45 +4375,37 @@ Default config:
 https://github.com/swyddfa/esbonio
 
 Esbonio is a language server for [Sphinx](https://www.sphinx-doc.org/en/master/) documentation projects.
-The language server can be installed via pip
+The language server can be installed as a standalone tool with uv or pipx.
 
 ```
-pip install esbonio
+uv tool install esbonio
 ```
 
-Since Sphinx is highly extensible you will get best results if you install the language server in the same
-Python environment as the one used to build your documentation. To ensure that the correct Python environment
-is picked up, you can either launch `nvim` with the correct environment activated.
+Configure the Python environment and Sphinx build command for each project in `pyproject.toml`.
 
-```
-source env/bin/activate
-nvim
+```toml
+[tool.esbonio.sphinx]
+pythonCommand = ["uv", "run", "python"]
+buildArguments = ["-M", "dirhtml", ".", "${defaultBuildDir}"]
 ```
 
-Or you can modify the default `cmd` to include the full path to the Python interpreter.
+The same options can be supplied through LSP settings if a project does not use `pyproject.toml`.
 
 ```lua
 vim.lsp.config('esbonio', {
-  cmd = { '/path/to/virtualenv/bin/python', '-m', 'esbonio.server' }
-})
-```
-
-Esbonio supports a number of config values passed as `init_options` on startup, for example.
-
-```lua
-vim.lsp.config('esbonio', {
-  init_options = {
-    server = {
-      logLevel = "debug"
+  settings = {
+    esbonio = {
+      sphinx = {
+        pythonCommand = { 'uv', 'run', 'python' },
+        buildCommand = { 'sphinx-build', '-M', 'dirhtml', '.', '${defaultBuildDir}' },
+      },
     },
-    sphinx = {
-      confDir = "/path/to/docs",
-      srcDir = "${confDir}/../docs-src"
-    }
+  },
 })
 ```
 
-A full list and explanation of the available options can be found [here](https://docs.esbon.io/en/esbonio-language-server-v0.16.4/lsp/getting-started.html?editor=neovim-lspconfig#configuration)
+See the [Esbonio documentation](https://docs.esbon.io/en/release/integrating/howto/nvim.html)
+for the full configuration reference and additional Neovim integration examples.
 
 Snippet to enable the language server:
 ```lua
@@ -4381,7 +4415,7 @@ vim.lsp.enable('esbonio')
 Default config:
 - `cmd` :
   ```lua
-  { "python3", "-m", "esbonio.server" }
+  { "esbonio", "server" }
   ```
 - `filetypes` :
   ```lua
@@ -4389,7 +4423,7 @@ Default config:
   ```
 - `root_markers` :
   ```lua
-  { ".git" }
+  { "conf.py", ".git" }
   ```
 
 ---
@@ -8334,6 +8368,41 @@ Default config:
 
 ---
 
+## ms_terraform_lsp
+
+https://github.com/Azure/ms-terraform-lsp
+
+Microsoft Terraform Providers Language Server. Provides completion, hover
+documentation and schema validation for the `azapi`, `azurerm` and `msgraph`
+providers, and for Azure Verified Modules.
+
+Only covers Microsoft providers, so it is intended to run alongside
+[terraformls](#terraformls).
+
+Download a released binary from
+https://github.com/Azure/ms-terraform-lsp/releases.
+
+Snippet to enable the language server:
+```lua
+vim.lsp.enable('ms_terraform_lsp')
+```
+
+Default config:
+- `cmd` :
+  ```lua
+  { "ms-terraform-lsp", "serve" }
+  ```
+- `filetypes` :
+  ```lua
+  { "terraform" }
+  ```
+- `root_markers` :
+  ```lua
+  { ".terraform", ".git" }
+  ```
+
+---
+
 ## msbuild_project_tools_server
 
 https://github.com/tintoy/msbuild-project-tools-server/
@@ -8989,7 +9058,7 @@ Default config:
   ```lua
   { "odin" }
   ```
-- `root_dir`: [../lsp/ols.lua:43](../lsp/ols.lua#L43)
+- `root_dir`: [../lsp/ols.lua:46](../lsp/ols.lua#L46)
 
 ---
 
@@ -9224,7 +9293,6 @@ Default config:
   { "javascript", "javascriptreact", "typescript", "typescriptreact", "toml", "json", "jsonc", "json5", "yaml", "html", "vue", "handlebars", "css", "scss", "less", "graphql", "markdown", "svelte" }
   ```
 - `root_dir`: [../lsp/oxfmt.lua:19](../lsp/oxfmt.lua#L19)
-- `workspace_required` : `true`
 
 ---
 
@@ -9268,7 +9336,6 @@ Default config:
   ```lua
   {}
   ```
-- `workspace_required` : `true`
 
 ---
 
@@ -9575,6 +9642,37 @@ Default config:
   { "php" }
   ```
 - `root_dir`: [../lsp/phan.lua:21](../lsp/phan.lua#L21)
+
+---
+
+## php_lsp
+
+https://github.com/jorgsowa/php-lsp
+
+A high-performance PHP language server written in Rust.
+
+Installation: `cargo install php-lsp`, or download a pre-built binary from
+https://github.com/jorgsowa/php-lsp/releases
+
+Snippet to enable the language server:
+```lua
+vim.lsp.enable('php_lsp')
+```
+
+Default config:
+- `cmd` :
+  ```lua
+  { "php-lsp" }
+  ```
+- `filetypes` :
+  ```lua
+  { "php" }
+  ```
+- `root_markers` :
+  ```lua
+  { "composer.json", ".git" }
+  ```
+- `workspace_required` : `true`
 
 ---
 
@@ -9953,6 +10051,16 @@ vim.lsp.config('powershell_es', {
 
 Note that the execution policy needs to be set to `Unrestricted` for the languageserver run under PowerShell
 
+By default, profile loading is disabled (`enableProfileLoading = false`) since the
+language server runs as a background process, not an interactive session, and a
+profile that writes to stdout can corrupt the LSP handshake. Override if needed:
+
+```lua
+vim.lsp.config('powershell_es', {
+  init_options = { enableProfileLoading = true },
+})
+```
+
 If necessary, specific `cmd` can be defined instead of `bundle_path`.
 See [PowerShellEditorServices](https://github.com/PowerShell/PowerShellEditorServices#standard-input-and-output)
 to learn more.
@@ -9969,10 +10077,16 @@ vim.lsp.enable('powershell_es')
 ```
 
 Default config:
-- `cmd`: [../lsp/powershell_es.lua:40](../lsp/powershell_es.lua#L40)
+- `cmd`: [../lsp/powershell_es.lua:91](../lsp/powershell_es.lua#L91)
 - `filetypes` :
   ```lua
   { "ps1" }
+  ```
+- `init_options` :
+  ```lua
+  {
+    enableProfileLoading = false
+  }
   ```
 - `root_markers` :
   ```lua
@@ -11431,7 +11545,7 @@ vim.lsp.enable('rust_analyzer')
 ```
 
 Default config:
-- `before_init`: [../lsp/rust_analyzer.lua:85](../lsp/rust_analyzer.lua#L85)
+- `before_init`: [../lsp/rust_analyzer.lua:89](../lsp/rust_analyzer.lua#L89)
 - `capabilities` :
   ```lua
   {
@@ -11451,8 +11565,8 @@ Default config:
   ```lua
   { "rust" }
   ```
-- `on_attach`: [../lsp/rust_analyzer.lua:85](../lsp/rust_analyzer.lua#L85)
-- `root_dir`: [../lsp/rust_analyzer.lua:85](../lsp/rust_analyzer.lua#L85)
+- `on_attach`: [../lsp/rust_analyzer.lua:89](../lsp/rust_analyzer.lua#L89)
+- `root_dir`: [../lsp/rust_analyzer.lua:89](../lsp/rust_analyzer.lua#L89)
 - `settings` :
   ```lua
   {
@@ -11489,6 +11603,63 @@ Default config:
     }
   }
   ```
+
+---
+
+## rust_glancer
+
+https://github.com/rust-glancer/rust-glancer
+
+`rust-glancer`, an incomplete-by-design Rust language server optimized for
+low memory usage and near-instant editor restarts.
+
+VS Code is currently the only officially supported editor; the project only
+publishes `.vsix` packages, so the `rust-glancer` binary must be built from
+source for use with Nvim:
+```sh
+git clone https://github.com/rust-glancer/rust-glancer
+cd rust-glancer
+cargo build --release -p rust-glancer
+# add target/release/ to $PATH, or point `cmd` at the built binary
+```
+`rust-src` is required regardless of editor:
+```sh
+rustup component add rust-src
+```
+
+Diagnostics (`cargo check`) are disabled by default; enable them via
+`diagnostics.onStartup` / `diagnostics.onSave` below.
+
+The server reads its configuration only from the LSP `initializationOptions`
+sent on startup (there is no `workspace/configuration` support), so options
+must be set via `init_options`, not `settings`:
+```lua
+vim.lsp.config('rust_glancer', {
+  init_options = {
+    diagnostics = {
+      onSave = true,
+    },
+  },
+})
+```
+See [configuration docs](https://rust-glancer.github.io/docs/usage/CONFIGURE.html) for the full
+set of options (`cfg`, `indexing`, `cargo`, `cache`, `diagnostics`).
+
+Snippet to enable the language server:
+```lua
+vim.lsp.enable('rust_glancer')
+```
+
+Default config:
+- `cmd` :
+  ```lua
+  { "rust-glancer", "lsp" }
+  ```
+- `filetypes` :
+  ```lua
+  { "rust" }
+  ```
+- `root_dir`: [../lsp/rust_glancer.lua:41](../lsp/rust_glancer.lua#L41)
 
 ---
 
@@ -11763,7 +11934,7 @@ Default config:
   ```
 - `root_markers` :
   ```lua
-  { ".git", ".slang" }
+  { { ".git", ".slang" } }
   ```
 
 ---
@@ -13137,6 +13308,88 @@ Default config:
   ```lua
   { "meson.build", "meson_options.txt", "meson.options", ".git" }
   ```
+
+---
+
+## symfony_lsp
+
+https://github.com/symfony/language-tools
+
+Symfony-aware completion, navigation, references, diagnostics, code actions,
+rename support and code lenses alongside a general PHP language server.
+
+Install the `symfony-lsp` executable from a release, then make it
+available on `PATH`.
+
+The server asks before executing application code for runtime indexing. Set
+`init_options.workspaceTrust` explicitly only for trusted workspaces.
+
+Snippet to enable the language server:
+```lua
+vim.lsp.enable('symfony_lsp')
+```
+
+Commands:
+- editor.action.showReferences
+
+Default config:
+- `capabilities` :
+  ```lua
+  {
+    workspace = {
+      didChangeWatchedFiles = {
+        dynamicRegistration = true
+      }
+    }
+  }
+  ```
+- `cmd` :
+  ```lua
+  { "symfony-lsp" }
+  ```
+- `commands` :
+  ```lua
+  {
+    ["editor.action.showReferences"] = <function 1>
+  }
+  ```
+- `filetypes` :
+  ```lua
+  { "php", "twig", "yaml", "json", "xml", "javascript", "typescript", "env" }
+  ```
+- `init_options` :
+  ```lua
+  {
+    consolePath = "bin/console",
+    containerProjectRoot = "",
+    debug = true,
+    environment = "dev",
+    phpCommand = { "php" },
+    projectRoots = {},
+    runtimeIndexing = true,
+    trace = "off"
+  }
+  ```
+- `root_markers` :
+  ```lua
+  { "composer.json", ".git" }
+  ```
+- `settings` :
+  ```lua
+  {
+    symfonyLsp = {
+      consolePath = "bin/console",
+      containerProjectRoot = "",
+      debug = true,
+      environment = "dev",
+      phpCommand = { "php" },
+      projectRoots = {},
+      runtimeIndexing = true,
+      translationDiagnostics = false
+    }
+  }
+  ```
+- `workspace_required` : `true`
 
 ---
 
