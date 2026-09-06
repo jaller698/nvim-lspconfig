@@ -1,3 +1,5 @@
+>[!note] This config is a fork with some personal changes, to better match my setup, should be upstreamed at some point
+
 # nvim-lspconfig
 
 nvim-lspconfig is a collection of LSP server configurations for the [Nvim LSP client](https://neovim.io/doc/user/lsp.html).
